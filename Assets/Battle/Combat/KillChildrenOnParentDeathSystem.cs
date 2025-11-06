@@ -12,34 +12,25 @@ namespace Battle.Combat
     [UpdateInGroup(typeof(AttackResultSystemsGroup)), UpdateAfter(typeof(DealAttackDamageSystem))]
     public class KillChildrenOnParentDeathSystem : SystemBase
     {
-
-        private PostAttackEntityBuffer m_entityBufferSystem;
-
-        protected override void OnCreate()
-        {
-            m_entityBufferSystem = World.GetOrCreateSystem<PostAttackEntityBuffer>();
-        }
-
         protected override void OnUpdate()
         {
-            var health = GetComponentDataFromEntity<Health>(true);
-            var buffer = m_entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var entityBufferSystem = World.GetOrCreateSystemManaged<PostAttackEntityBuffer>();
+            var buffer = entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .ForEach(
                 (Entity e, int entityInQueryIndex, in Parent parent) =>
                 {
-                    if (!health.HasComponent(parent.Value))
+                    if (!SystemAPI.HasComponent<Health>(parent.Value))
                         return;
 
-                    if (health[parent.Value].Value < 0f)
+                    if (SystemAPI.GetComponent<Health>(parent.Value).Value < 0f)
                         buffer.DestroyEntity(entityInQueryIndex, e);
                 }
                 )
-                .WithReadOnly(health)
                 .ScheduleParallel();
 
-            m_entityBufferSystem.AddJobHandleForProducer(Dependency);
+            entityBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

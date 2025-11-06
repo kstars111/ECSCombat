@@ -15,17 +15,10 @@ namespace Battle.Equipment
     /// The entities are concurrently marked as Equipped using an entity command buffer, to make this a one-time system per equipment.
     /// Equipped entities are added to their parent's EquipmentList.
     /// </summary>
-    [AlwaysUpdateSystem]
     [UpdateInGroup(typeof(EarlyEquipmentUpdateGroup))]
     public class EquipSystem : SystemBase
     {
         protected EntityQuery EntitiesToEquip;
-        protected EarlyEquipmentBufferSystem EquipmentBuffer;
-
-        protected override void OnCreate()
-        {
-            EquipmentBuffer = World.GetOrCreateSystem<EarlyEquipmentBufferSystem>();
-        }
 
         protected override void OnUpdate()
         {
@@ -34,7 +27,8 @@ namespace Battle.Equipment
             var ParentEntities = new NativeArray<Entity>(count, Allocator.TempJob);
 
             // Start by sorting newly added equipment by parent entity.
-            var buffer = EquipmentBuffer.CreateCommandBuffer().AsParallelWriter();
+            var equipmentBuffer = World.GetOrCreateSystemManaged<EarlyEquipmentBufferSystem>();
+            var buffer = equipmentBuffer.CreateCommandBuffer().AsParallelWriter();
             Dependency = 
                 Entities
                 .WithAll<Equipment>()
@@ -55,11 +49,11 @@ namespace Battle.Equipment
                 )
                 .Schedule(Dependency);
 
-            EquipmentBuffer.AddJobHandleForProducer(Dependency);
+            equipmentBuffer.AddJobHandleForProducer(Dependency);
 
             Dependency = new UpdateEquipmentLists
             {
-                EquipmentLists = GetBufferFromEntity<EquipmentList>(false),
+                EquipmentLists = GetBufferLookup<EquipmentList>(false),
                 Equipments = EquipmentEntities,
                 Parents = ParentEntities
             }.Schedule(Dependency);
@@ -76,7 +70,7 @@ namespace Battle.Equipment
         {
             [ReadOnly] public NativeArray<Entity> Parents;
             [ReadOnly] public NativeArray<Entity> Equipments;
-            public BufferFromEntity<EquipmentList> EquipmentLists;
+            public BufferLookup<EquipmentList> EquipmentLists;
 
             public void Execute()
             {

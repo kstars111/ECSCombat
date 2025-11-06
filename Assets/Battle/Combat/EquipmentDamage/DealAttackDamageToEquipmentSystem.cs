@@ -35,11 +35,11 @@ namespace Battle.Combat
             {
                 Random = new Random((uint)UnityEngine.Random.Range(1, 10000)),
             Attacks = Attacks,
-                AttackTargets = GetComponentDataFromEntity<Target>(true),
-                AttackDamages = GetComponentDataFromEntity<Damage>(true),
-                EquipmentLists = GetBufferFromEntity<EquipmentList>(true),
-                CombatSize = GetComponentDataFromEntity<CombatSize>(true),
-                EquipmentHealths = GetComponentDataFromEntity<Health>(false)                
+                AttackTargets = GetComponentLookup<Target>(true),
+                AttackDamages = GetComponentLookup<Damage>(true),
+                EquipmentLists = GetBufferLookup<EquipmentList>(true),
+                CombatSize = GetComponentLookup<CombatSize>(true),
+                EquipmentHealths = GetComponentLookup<Health>(false)
             }.Schedule(Dependency);
         }
 
@@ -47,11 +47,11 @@ namespace Battle.Combat
         {
             public Random Random;
             [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<Entity> Attacks;
-            [ReadOnly] public ComponentDataFromEntity<Target> AttackTargets;
-            [ReadOnly] public ComponentDataFromEntity<Damage> AttackDamages;
-            [ReadOnly] public BufferFromEntity<EquipmentList> EquipmentLists;
-            public ComponentDataFromEntity<Health> EquipmentHealths;
-            [ReadOnly] public ComponentDataFromEntity<CombatSize> CombatSize;
+            [ReadOnly] public ComponentLookup<Target> AttackTargets;
+            [ReadOnly] public ComponentLookup<Damage> AttackDamages;
+            [ReadOnly] public BufferLookup<EquipmentList> EquipmentLists;
+            public ComponentLookup<Health> EquipmentHealths;
+            [ReadOnly] public ComponentLookup<CombatSize> CombatSize;
 
             public void Execute()
             {

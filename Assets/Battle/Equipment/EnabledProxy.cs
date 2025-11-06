@@ -3,12 +3,16 @@ using UnityEngine;
 
 namespace Battle.Equipment
 {
-    public class EnabledProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class EnabledProxy : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    }
+
+    public class EnabledBaker : Baker<EnabledProxy>
+    {
+        public override void Bake(EnabledProxy authoring)
         {
-            var data = new Enabling();
-            dstManager.AddComponentData(entity, data);
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Enabling());
         }
     }
 }

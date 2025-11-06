@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Battle.Combat.Calculations
 {
-    public class EffectiveRangeProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class EffectiveRangeProxy : MonoBehaviour
     {
         [Tooltip("Start of the range over which effectiveness changes.")]
         public float EffectiveRangeStart = 1f;
@@ -16,15 +16,19 @@ namespace Battle.Combat.Calculations
 
         [Tooltip("Does effectiveness increase or decrease over the effective range?")]
         public bool IsIncreasing;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class EffectiveRangeBaker : Baker<EffectiveRangeProxy>
+    {
+        public override void Bake(EffectiveRangeProxy authoring)
         {
-            dstManager.AddComponentData(entity,
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity,
                 new LinearEffectiveRange {
-                    EffectiveRangeStart = EffectiveRangeStart,
-                    EffectiveRangeEnd = EffectiveRangeEnd,
-                    MinimumEffectiveness = MinimumEffectiveness,
-                    IsIncreasing = IsIncreasing
+                    EffectiveRangeStart = authoring.EffectiveRangeStart,
+                    EffectiveRangeEnd = authoring.EffectiveRangeEnd,
+                    MinimumEffectiveness = authoring.MinimumEffectiveness,
+                    IsIncreasing = authoring.IsIncreasing
                 });
         }
     }

@@ -1,28 +1,33 @@
 ﻿using System;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Rendering;
+using Unity.Entities.Graphics;
 using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class TeamProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class TeamProxy : MonoBehaviour
     {
         public byte TeamID = 0;
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    }
+
+    public class TeamBaker : Baker<TeamProxy>
+    {
+        public override void Bake(TeamProxy authoring)
         {
-            var data = new Team { ID = TeamID };
-            dstManager.AddComponentData(entity, data);
+            var entity = GetEntity(TransformUsageFlags.None);
+            var data = new Team { ID = authoring.TeamID };
+            AddComponent(entity, data);
 
             // Define team colors
             float4 color;
-            switch (TeamID)
+            switch (authoring.TeamID)
             {
                 default: color = new float4(1.0f, 1.0f, 1.0f, 1.0f); break;
                 case 1: color = new float4(0.5f, 0.7f, 1.0f, 1.0f); break;
                 case 2: color = new float4(1.0f, 0.0f, 0.0f, 1.0f); break;
             }
-            dstManager.AddComponentData(entity, new MaterialColor { Value = color });
+            AddComponent(entity, new MaterialColor { Value = color });
         }
     }
 

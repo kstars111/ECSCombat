@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class HealAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    public class HealAuthoring : MonoBehaviour
     {
         public float Heal;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class HealBaker : Baker<HealAuthoring>
+    {
+        public override void Bake(HealAuthoring authoring)
         {
-            dstManager.AddComponentData(entity, new Heal { Value = Heal });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Heal { Value = authoring.Heal });
         }
     }
 }

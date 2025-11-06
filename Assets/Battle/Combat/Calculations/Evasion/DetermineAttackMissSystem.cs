@@ -15,17 +15,15 @@ namespace Battle.Combat.AttackSources
         protected override void OnUpdate()
         {
             uint seed = (uint)UnityEngine.Random.Range(1,100000);
-            var evasions = GetComponentDataFromEntity<Evasion>(true);
 
             Entities
-                .WithReadOnly(evasions)
                 .ForEach( ( Entity entity , int entityInQueryIndex , ref Attack attack , in Target target ) =>
                 {
-                    if( evasions.HasComponent(target.Value) )
+                    if( SystemAPI.HasComponent<Evasion>(target.Value) )
                     {
-                        float evasion = evasions[target.Value].Rating;
+                        float evasion = SystemAPI.GetComponent<Evasion>(target.Value).Rating;
                         float hitChance = math.exp( -evasion / attack.Accuracy );
-                        
+
                         var rnd = new Random( seed + (uint)(entityInQueryIndex*1000) );
                         if( rnd.NextFloat()>hitChance )
                             attack.Result = Attack.eResult.Miss;

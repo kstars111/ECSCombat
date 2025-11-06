@@ -6,31 +6,30 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class ProjectileProxy : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+    public class ProjectileProxy : MonoBehaviour
     {
         [Tooltip("Attack transferred by this projectile to the target.")]
         public GameObject Attack;
 
         public bool Homing;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class ProjectileBaker : Baker<ProjectileProxy>
+    {
+        public override void Bake(ProjectileProxy authoring)
         {
-            var prefab = conversionSystem.GetPrimaryEntity(Attack);
-            dstManager.AddComponentData(entity, new Projectile { AttackEntity = prefab, ReachedTarget = false });
-            dstManager.AddComponentData(entity, new Instigator());
-            dstManager.AddComponentData(entity, new Target());
+            var entity = GetEntity(TransformUsageFlags.None);
+            var prefab = GetEntity(authoring.Attack, TransformUsageFlags.None);
+            AddComponent(entity, new Projectile { AttackEntity = prefab, ReachedTarget = false });
+            AddComponent(entity, new Instigator());
+            AddComponent(entity, new Target());
 
-            if (Homing)
+            if (authoring.Homing)
             {
-                dstManager.AddComponentData(entity, new Homing());
-                dstManager.AddComponentData(entity, new TurnToDestinationBehaviour());
-                dstManager.AddComponentData(entity, new Heading());
+                AddComponent(entity, new Homing());
+                AddComponent(entity, new TurnToDestinationBehaviour());
+                AddComponent(entity, new Heading());
             }
-        }
-
-        public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
-        {
-            referencedPrefabs.Add(Attack);
         }
     }
 }

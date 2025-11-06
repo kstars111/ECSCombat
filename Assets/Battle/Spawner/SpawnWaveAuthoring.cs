@@ -5,29 +5,26 @@ using UnityEngine;
 namespace Battle.Spawner
 {
     [DisallowMultipleComponent]
-    public class SpawnWaveAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+    public class SpawnWaveAuthoring : MonoBehaviour
     {
         public List<GameObject> SpawnWaves;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class SpawnWaveBaker : Baker<SpawnWaveAuthoring>
+    {
+        public override void Bake(SpawnWaveAuthoring authoring)
         {
-            dstManager.AddBuffer<SpawnWave>(entity);
+            var entity = GetEntity(TransformUsageFlags.None);
+            var buffer = AddBuffer<SpawnWave>(entity);
 
-            var buffer = dstManager.GetBuffer<SpawnWave>(entity);
-
-            for (int i = 0; i < SpawnWaves.Count; i++)
+            for (int i = 0; i < authoring.SpawnWaves.Count; i++)
             {
-                var wave = conversionSystem.GetPrimaryEntity(SpawnWaves[i]);
+                var wave = GetEntity(authoring.SpawnWaves[i], TransformUsageFlags.None);
                 buffer.Add(new SpawnWave
                 {
                     Wave = wave
                 });
             }
-        }
-
-        public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
-        {
-            referencedPrefabs.AddRange(SpawnWaves);
         }
     }
 }

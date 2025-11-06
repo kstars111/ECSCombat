@@ -18,8 +18,6 @@ namespace Battle.Combat.Calculations
     {
         protected override void OnUpdate()
         {
-            var positions = GetComponentDataFromEntity<LocalToWorld>(true);
-
             Entities.ForEach(
                 (
                     Entity entity,
@@ -30,7 +28,7 @@ namespace Battle.Combat.Calculations
                     in Target target
                 ) =>
                 {
-                    float3 targetPosition = positions[target.Value].Position;
+                    float3 targetPosition = SystemAPI.GetComponent<LocalToWorld>(target.Value).Position;
                     float distance = math.distance(targetPosition, sourceLocation.Value);
 
                     //amount varies from 0 to 1 over the effective range.
@@ -41,7 +39,6 @@ namespace Battle.Combat.Calculations
                         (math.clamp(amount, 0f, 1f) * (1f - effectiveRange.MinimumEffectiveness) + effectiveRange.MinimumEffectiveness);
                 }
                 )
-                .WithReadOnly(positions)
                 .ScheduleParallel();
         }
     }

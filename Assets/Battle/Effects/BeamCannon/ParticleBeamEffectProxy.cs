@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.Effects
 {
-    public class ParticleBeamEffectProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class ParticleBeamEffectProxy : MonoBehaviour
     {
         public GameObject ParticleSystem;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class ParticleBeamEffectBaker : Baker<ParticleBeamEffectProxy>
+    {
+        public override void Bake(ParticleBeamEffectProxy authoring)
         {
-            dstManager.AddSharedComponentData(entity, new ParticleBeamEffect { ParticleSystem = ParticleSystem });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddSharedComponent(entity, new ParticleBeamEffect { ParticleSystem = authoring.ParticleSystem });
         }
     }
 }

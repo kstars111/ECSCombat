@@ -15,16 +15,10 @@ namespace Battle.Combat
         ]
     public class AircraftHangarSystem : SystemBase
     {
-        WeaponEntityBufferSystem m_EntityCommandBufferSystem;
-
-        protected override void OnCreate()
-        {
-            m_EntityCommandBufferSystem = World.GetOrCreateSystem<WeaponEntityBufferSystem>();
-        }
-
         protected override void OnUpdate()
         {
-            var buffer = m_EntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var entityCommandBufferSystem = World.GetOrCreateSystemManaged<WeaponEntityBufferSystem>();
+            var buffer = entityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .ForEach(
@@ -50,7 +44,7 @@ namespace Battle.Combat
                 })
                 .ScheduleParallel();
 
-            m_EntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
+            entityCommandBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

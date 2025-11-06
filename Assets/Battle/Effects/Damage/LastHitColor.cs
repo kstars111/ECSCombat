@@ -1,7 +1,7 @@
 ﻿using System;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Rendering;
+using Unity.Entities.Graphics;
 
 namespace Battle.Effects
 {

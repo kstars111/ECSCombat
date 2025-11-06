@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class ProjectileWeaponProxy : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+    public class ProjectileWeaponProxy : MonoBehaviour
     {
         [Tooltip("Projectile created by this weapon.")]
         public GameObject Projectile;
@@ -19,20 +19,19 @@ namespace Battle.Combat
 
         [Tooltip("Full attack cone for the weapon, in degrees")]
         public float AttackCone;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class ProjectileWeaponBaker : Baker<ProjectileWeaponProxy>
+    {
+        public override void Bake(ProjectileWeaponProxy authoring)
         {
-            float coneInRad = AttackCone * Mathf.PI / 180f;
-            var prefab = conversionSystem.GetPrimaryEntity(Projectile);
+            var entity = GetEntity(TransformUsageFlags.None);
+            float coneInRad = authoring.AttackCone * Mathf.PI / 180f;
+            var prefab = GetEntity(authoring.Projectile, TransformUsageFlags.None);
             //if (!dstManager.HasComponent<Projectile>(prefab))
             //    throw new Exception("ProjectileWeaponProxy Projectile archetype must have a Projectile component.");
-            dstManager.AddComponentData(entity, new ProjectileWeapon { Projectile = prefab });
-            dstManager.AddComponentData(entity, new TargettedTool { Armed = Armed, Range = Range, Cone = coneInRad, Firing = false });
-        }
-
-        public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
-        {
-            referencedPrefabs.Add(Projectile);
+            AddComponent(entity, new ProjectileWeapon { Projectile = prefab });
+            AddComponent(entity, new TargettedTool { Armed = authoring.Armed, Range = authoring.Range, Cone = coneInRad, Firing = false });
         }
     }
 }

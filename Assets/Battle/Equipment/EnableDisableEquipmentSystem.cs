@@ -12,14 +12,12 @@ namespace Battle.Equipment
         ]
     public class EnableDisableEquipmentSystem : SystemBase
     {
-        protected EquipmentBufferSystem EquipmentBuffer;
         protected EntityQuery EnablingQuery;
         protected EntityQuery DisablingQuery;
 
         protected override void OnCreate()
         {
-            EquipmentBuffer = World.GetOrCreateSystem<EquipmentBufferSystem>();
-            EnablingQuery = GetEntityQuery(new EntityQueryDesc { 
+            EnablingQuery = GetEntityQuery(new EntityQueryDesc {
                 All = new[] {
                     ComponentType.ReadOnly<Enabling>()
                 }});
@@ -33,12 +31,13 @@ namespace Battle.Equipment
 
         protected override void OnUpdate()
         {
-            var buffer = EquipmentBuffer.CreateCommandBuffer();
+            var equipmentBuffer = World.GetOrCreateSystemManaged<EquipmentBufferSystem>();
+            var buffer = equipmentBuffer.CreateCommandBuffer();
             buffer.RemoveComponent<Enabled>(DisablingQuery);
             buffer.RemoveComponent<Disabling>(DisablingQuery);
             buffer.AddComponent<Enabled>(EnablingQuery);
             buffer.RemoveComponent<Enabling>(EnablingQuery);
-            EquipmentBuffer.AddJobHandleForProducer(Dependency);
+            equipmentBuffer.AddJobHandleForProducer(Dependency);
         }
     }
 }

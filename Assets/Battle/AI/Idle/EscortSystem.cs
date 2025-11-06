@@ -14,14 +14,11 @@ namespace Battle.AI
     {
         protected override void OnUpdate()
         {
-            var ltwData = GetComponentDataFromEntity<LocalToWorld>( isReadOnly:true );
-
             Entities
-                .WithReadOnly(ltwData)
                 .ForEach( ( ref RandomWalkBehaviour walk , in Escort escort ) =>
                 {
-                    if( ltwData.HasComponent(escort.Target) )
-                        walk.Centre = ltwData[escort.Target].Position;
+                    if( SystemAPI.HasComponent<LocalToWorld>(escort.Target) )
+                        walk.Centre = SystemAPI.GetComponent<LocalToWorld>(escort.Target).Position;
                 } )
                 .WithBurst()
                 .ScheduleParallel();

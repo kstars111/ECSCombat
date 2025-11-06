@@ -6,7 +6,7 @@ using Battle.Combat;
 using Unity.Collections;
 using Unity.Burst;
 using Unity.Jobs;
-using Unity.Rendering;
+using Unity.Entities.Graphics;
 using Battle.Movement;
 using Unity.Mathematics;
 using UnityEditor;
@@ -20,15 +20,13 @@ namespace Battle.Effects
         UpdateAfter(typeof(PostAttackEntityBuffer)),
         //UpdateBefore(typeof(LateSimulationSystemGroup))
     ]
-    public class SpawnShieldEffectSystem : ComponentSystem
+    public class SpawnShieldEffectSystem : SystemBase
     {
-        EndSimulationEntityCommandBufferSystem BufferSystem;
         Material ShieldMaterial;
         Mesh Mesh;
 
         protected override void OnCreate()
         {
-            BufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
             //ShieldMaterial = (Material)AssetDatabase.LoadAssetAtPath("Assets/Art/Effects/Shields/ShieldMaterial.mat", typeof(Material));
             ShieldMaterial = Resources.Load<Material>("ShieldMaterial");
             //Mesh = (Mesh)AssetDatabase.LoadAssetAtPath("Assets/Art/Misc/ScalePlane.fbx", typeof(Mesh));
@@ -42,15 +40,20 @@ namespace Battle.Effects
 
         protected override void OnUpdate()
         {
-            var Buffer = BufferSystem.CreateCommandBuffer();
+            var bufferSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
+            var Buffer = bufferSystem.CreateCommandBuffer();
+            var mesh = Mesh;
+            var material = ShieldMaterial;
+
             Entities.ForEach(
                 (ref ShieldHitEffect effect, ref LocalToWorld localToWorld, ref Shield shield) =>
                 {
                     var e = Buffer.CreateEntity();
                     Buffer.AddComponent(e, new Lifetime { Value = 0.3f });
-                    Buffer.AddComponent(e, new Translation { Value = localToWorld.Position });
-                    Buffer.AddComponent(e, new Rotation { Value = quaternion.LookRotation(effect.HitDirection, new float3(0.0f, 1.0f, 0.0f)) });
-                    Buffer.AddComponent(e, new Scale { Value = shield.Radius });
+                    Buffer.AddComponent(e, LocalTransform.FromPositionRotationScale(
+                        localToWorld.Position,
+                        quaternion.LookRotation(effect.HitDirection, new float3(0.0f, 1.0f, 0.0f)),
+                        shield.Radius));
                     Buffer.AddComponent(e, new LocalToWorld { });
                     Buffer.AddComponent(e, new RenderBounds {  });
                     Buffer.AddSharedComponent(e,
@@ -58,11 +61,11 @@ namespace Battle.Effects
                     {
                         castShadows = UnityEngine.Rendering.ShadowCastingMode.Off,
                         receiveShadows = false,
-                        mesh = Mesh,
-                        material = ShieldMaterial
+                        mesh = mesh,
+                        material = material
                     });
                 }
-                );
+                ).Run();
         }
     }
 }

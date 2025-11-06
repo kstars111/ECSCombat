@@ -3,12 +3,16 @@ using Unity.Entities;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class ArmorAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class ArmorAuthoring : MonoBehaviour
 {
     public float HealthPercentBonus;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+public class ArmorBaker : Baker<ArmorAuthoring>
+{
+    public override void Bake(ArmorAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new Armor { HealthFractionBonus = HealthPercentBonus / 100f});
+        var entity = GetEntity(TransformUsageFlags.None);
+        AddComponent(entity, new Armor { HealthFractionBonus = authoring.HealthPercentBonus / 100f });
     }
 }

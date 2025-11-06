@@ -11,18 +11,17 @@ namespace Battle.Combat
         ]
     public class DestroyAttacksSystem : SystemBase
     {
-        private EndSimulationEntityCommandBufferSystem m_endSimBufferSystem;
         private EntityQuery AttackQuery;
 
         protected override void OnCreate()
         {
-            m_endSimBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
             AttackQuery = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Attack>());
         }
 
         protected override void OnUpdate()
         {
-            var buffer = m_endSimBufferSystem.CreateCommandBuffer();
+            var endSimBufferSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
+            var buffer = endSimBufferSystem.CreateCommandBuffer();
             buffer.DestroyEntity(AttackQuery);
         }
     }

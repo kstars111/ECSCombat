@@ -16,20 +16,16 @@ namespace Battle.Combat
     {
         protected override void OnUpdate()
         {
-            var targetables = GetComponentDataFromEntity<Targetable>(true);
-            var deleting = GetComponentDataFromEntity<Delete>(true);
             Entities
                 .ForEach(
                 (ref Target target) =>
                 {
-                    if (!targetables.HasComponent(target.Value))
+                    if (!SystemAPI.HasComponent<Targetable>(target.Value))
                         target.Value = Entity.Null;
-                    if (deleting.HasComponent(target.Value))
+                    if (SystemAPI.HasComponent<Delete>(target.Value))
                         target.Value = Entity.Null;
                 }
                 )
-                .WithReadOnly(targetables)
-                .WithReadOnly(deleting)
                 .ScheduleParallel();
         }
     }

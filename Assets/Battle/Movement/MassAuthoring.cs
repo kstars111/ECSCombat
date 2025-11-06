@@ -3,14 +3,18 @@ using UnityEngine;
 
 namespace Battle.Movement
 {
-    public class MassAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+    public class MassAuthoring : MonoBehaviour
     {
         [Tooltip("Mass of a ship.")]
         public float Mass = 1.0f;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class MassBaker : Baker<MassAuthoring>
+    {
+        public override void Bake(MassAuthoring authoring)
         {
-            dstManager.AddComponentData(entity, new Mass { Value = Mass, Base = Mass });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Mass { Value = authoring.Mass, Base = authoring.Mass });
         }
     }
 }

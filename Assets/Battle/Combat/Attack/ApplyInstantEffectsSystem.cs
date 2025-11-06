@@ -19,17 +19,10 @@ namespace Battle.Combat.AttackSources
         ]
     public class ApplyInstantEffectsSystem : SystemBase
     {
-        protected WeaponEntityBufferSystem m_entityBufferSystem;
-
-        protected override void OnCreate()
-        {
-            m_entityBufferSystem = World.GetOrCreateSystem<WeaponEntityBufferSystem>();
-        }
-
         protected override void OnUpdate()
         {
-            var buffer = m_entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
-            var transforms = GetComponentDataFromEntity<LocalToWorld>(true);
+            var entityBufferSystem = World.GetOrCreateSystemManaged<WeaponEntityBufferSystem>();
+            var buffer = entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities.ForEach(
                 (
@@ -55,14 +48,13 @@ namespace Battle.Combat.AttackSources
                     buffer.AddComponent(entityInQueryIndex, attack, new EffectSourceLocation { Value = localToWorld.Position });
                     buffer.AddComponent(entityInQueryIndex, attack, new Effectiveness { Value = 1f });
                     buffer.AddComponent(entityInQueryIndex, attack, new SourceLocation { Position = localToWorld.Position });
-                    if (transforms.HasComponent(target.Value))
-                        buffer.AddComponent(entityInQueryIndex, attack, new HitLocation { Position = transforms[target.Value].Position });
+                    if (SystemAPI.HasComponent<LocalToWorld>(target.Value))
+                        buffer.AddComponent(entityInQueryIndex, attack, new HitLocation { Position = SystemAPI.GetComponent<LocalToWorld>(target.Value).Position });
                 }
                 )
-                .WithReadOnly(transforms)
                 .ScheduleParallel();
 
-            m_entityBufferSystem.AddJobHandleForProducer(Dependency);
+            entityBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

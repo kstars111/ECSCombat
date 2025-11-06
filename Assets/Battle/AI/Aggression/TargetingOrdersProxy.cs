@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Battle.AI
 {
-    public class TargetingOrdersProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class TargetingOrdersProxy : MonoBehaviour
     {
         [Tooltip("Types of entity we are encouraged to target.")]
         public AgentCategory.eType PreferredTargets;
@@ -15,12 +15,6 @@ namespace Battle.AI
 
         public bool TargetSameTeam = false;
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-        {
-            var targetOrders = new TargetingOrders { Discouraged = DiscouragedTargets, Preferred = PreferredTargets, TargetSameTeam = TargetSameTeam };
-            dstManager.AddComponentData(entity, targetOrders);
-        }
-
 #if UNITY_EDITOR
         void OnGUI()
         {
@@ -28,5 +22,15 @@ namespace Battle.AI
             DiscouragedTargets = (AgentCategory.eType)EditorGUILayout.EnumFlagsField("Discouraged Targets", DiscouragedTargets);
         }
 #endif
+    }
+
+    public class TargetingOrdersBaker : Baker<TargetingOrdersProxy>
+    {
+        public override void Bake(TargetingOrdersProxy authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.None);
+            var targetOrders = new TargetingOrders { Discouraged = authoring.DiscouragedTargets, Preferred = authoring.PreferredTargets, TargetSameTeam = authoring.TargetSameTeam };
+            AddComponent(entity, targetOrders);
+        }
     }
 }

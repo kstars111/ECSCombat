@@ -3,14 +3,18 @@ using UnityEngine;
 
 namespace Battle.Effects
 {
-    public class DeathExplosionEffectProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class DeathExplosionEffectProxy : MonoBehaviour
     {
         [Tooltip("Particle system generated when the entity dies.")]
         public GameObject ParticleSystem;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class DeathExplosionEffectBaker : Baker<DeathExplosionEffectProxy>
+    {
+        public override void Bake(DeathExplosionEffectProxy authoring)
         {
-            dstManager.AddSharedComponentData(entity, new DeathExplosionEffect { ParticleSystem = ParticleSystem });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddSharedComponent(entity, new DeathExplosionEffect { ParticleSystem = authoring.ParticleSystem });
         }
     }
 }

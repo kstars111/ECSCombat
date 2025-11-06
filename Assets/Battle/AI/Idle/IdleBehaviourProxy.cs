@@ -3,11 +3,16 @@ using UnityEngine;
 
 namespace Battle.AI
 {
-    public class IdleBehaviourProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class IdleBehaviourProxy : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    }
+
+    public class IdleBehaviourBaker : Baker<IdleBehaviourProxy>
+    {
+        public override void Bake(IdleBehaviourProxy authoring)
         {
-            dstManager.AddComponentData(entity, new IdleBehaviour { });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new IdleBehaviour { });
         }
     }
 }

@@ -3,13 +3,17 @@ using Unity.Entities;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class EquipmentMassAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class EquipmentMassAuthoring : MonoBehaviour
 {
     [Tooltip("Percentage increase the entitie's mass when the equipment is added.")]
     public float MassPercentageIncrease;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+public class EquipmentMassBaker : Baker<EquipmentMassAuthoring>
+{
+    public override void Bake(EquipmentMassAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new EquipmentMass { MassFractionalIncrease = MassPercentageIncrease / 100f });
+        var entity = GetEntity(TransformUsageFlags.None);
+        AddComponent(entity, new EquipmentMass { MassFractionalIncrease = authoring.MassPercentageIncrease / 100f });
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Battle.Combat.AttackSources
 {
-    public class DirectWeaponProxy : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+    public class DirectWeaponProxy : MonoBehaviour
     {
         [Tooltip("Ammunition used by this direct weapon.")]
         public GameObject Ammo;
@@ -20,18 +20,17 @@ namespace Battle.Combat.AttackSources
 
         [Tooltip("Base accuracy rating of the weapon")]
         public float Accuracy;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class DirectWeaponBaker : Baker<DirectWeaponProxy>
+    {
+        public override void Bake(DirectWeaponProxy authoring)
         {
-            float coneInRad = AttackCone * Mathf.PI / 180f;
-            var prefab = conversionSystem.GetPrimaryEntity(Ammo);
-            dstManager.AddComponentData(entity, new InstantEffect { AttackTemplate = prefab, Accuracy = Accuracy });
-            dstManager.AddComponentData(entity, new TargettedTool { Armed = Armed, Range = Range, Cone = coneInRad, Firing = false });
-        }
-
-        public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
-        {
-            referencedPrefabs.Add(Ammo);
+            var entity = GetEntity(TransformUsageFlags.None);
+            float coneInRad = authoring.AttackCone * Mathf.PI / 180f;
+            var prefab = GetEntity(authoring.Ammo, TransformUsageFlags.None);
+            AddComponent(entity, new InstantEffect { AttackTemplate = prefab, Accuracy = authoring.Accuracy });
+            AddComponent(entity, new TargettedTool { Armed = authoring.Armed, Range = authoring.Range, Cone = coneInRad, Firing = false });
         }
     }
 }

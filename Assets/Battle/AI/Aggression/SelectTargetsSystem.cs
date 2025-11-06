@@ -7,7 +7,6 @@ using Battle.Combat;
 
 namespace Battle.AI
 {
-    [AlwaysUpdateSystem]
     [UpdateInGroup(typeof(AISystemGroup))]
     public class SelectTargetsSystem : SystemBase
     {

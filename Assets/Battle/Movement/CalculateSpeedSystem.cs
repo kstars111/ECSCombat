@@ -3,7 +3,6 @@ using Unity.Entities;
 
 namespace Battle.Movement
 {
-    [AlwaysUpdateSystem]
     [UpdateInGroup(typeof(MovementUpdateSystemsGroup))]
     [UpdateBefore(typeof(UpdateTranslationSystem))]
     [UpdateBefore(typeof(UpdateRotationSystem))]

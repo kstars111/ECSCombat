@@ -3,12 +3,16 @@ using Unity.Entities;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class ShieldEquipmentAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class ShieldEquipmentAuthoring : MonoBehaviour
 {
     public float HealthPercentBonus;
+}
 
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+public class ShieldEquipmentBaker : Baker<ShieldEquipmentAuthoring>
+{
+    public override void Bake(ShieldEquipmentAuthoring authoring)
     {
-        dstManager.AddComponentData(entity, new ShieldEquipment { HealthFractionBonus = HealthPercentBonus / 100f });
+        var entity = GetEntity(TransformUsageFlags.None);
+        AddComponent(entity, new ShieldEquipment { HealthFractionBonus = authoring.HealthPercentBonus / 100f });
     }
 }
