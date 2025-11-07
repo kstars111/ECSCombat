@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.AI
 {
-    public class TurretBehaviourProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class TurretBehaviourProxy : MonoBehaviour
     {
         public float Range;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class TurretBehaviourBaker : Baker<TurretBehaviourProxy>
+    {
+        public override void Bake(TurretBehaviourProxy authoring)
         {
-            dstManager.AddComponentData(entity, new TurretBehaviour { Range = Range });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new TurretBehaviour { Range = authoring.Range });
         }
     }
 }

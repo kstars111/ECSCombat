@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class SizeRadiusProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class SizeRadiusProxy : MonoBehaviour
     {
         public float Size;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class SizeRadiusBaker : Baker<SizeRadiusProxy>
+    {
+        public override void Bake(SizeRadiusProxy authoring)
         {
-            dstManager.AddComponentData(entity, new SizeRadius { Value = Size });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new SizeRadius { Value = authoring.Size });
         }
     }
 }

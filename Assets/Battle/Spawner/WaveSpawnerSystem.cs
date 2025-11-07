@@ -9,16 +9,10 @@ namespace Battle.Spawner
     [UpdateInGroup(typeof(SpawnSystemGroup))]
     public class WaveSpawnerSystem : SystemBase
     {
-        EntityCommandBufferSystem BufferSystem;
-
-        protected override void OnCreate()
-        {
-            BufferSystem = World.GetOrCreateSystem<SpawnSystemEntityBuffer>();
-        }
-
         protected override void OnUpdate()
         {
-            var buffer = BufferSystem.CreateCommandBuffer();
+            var bufferSystem = World.GetOrCreateSystemManaged<SpawnSystemEntityBuffer>();
+            var buffer = bufferSystem.CreateCommandBuffer();
 
             float dt = Time.DeltaTime;
             Entities.WithNone<SpawnWaveComponent>().ForEach(

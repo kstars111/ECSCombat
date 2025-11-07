@@ -10,12 +10,10 @@ namespace Battle.Effects
     /// Spawns particle beam effects.
     /// </summary>
     [UpdateInGroup(typeof(AttackResultSystemsGroup))]
-    public class ParticleBeamEffectSystem : ComponentSystem
+    public class ParticleBeamEffectSystem : SystemBase
     {
         protected override void OnUpdate()
         {
-            var positions = GetComponentDataFromEntity<LocalToWorld>(true);
-
             Entities.ForEach(
                 (ParticleBeamEffect effect, ref Attack attack, ref HitLocation hitLoc, ref SourceLocation sourceLoc) =>
                 {
@@ -46,7 +44,7 @@ namespace Battle.Effects
                     shape.scale = new Vector3(length / 2f, 0f, 0f);
                     shape.position = new Vector3(length / 2f, 0f, 0f);
                 }
-            );
+            ).Run();
         }
     }
 }

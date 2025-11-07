@@ -4,15 +4,19 @@ using UnityEngine;
 
 namespace Battle.Effects
 {
-    public class LaserBeamProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class LaserBeamProxy : MonoBehaviour
     {
         public float Width = 0.1f;
         public Color PrimaryColor;
         public Color SecondaryColor;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class LaserBeamBaker : Baker<LaserBeamProxy>
+    {
+        public override void Bake(LaserBeamProxy authoring)
         {
-            dstManager.AddComponentData(entity, new BeamEffectStyle { Width = Width, PrimaryColor = new float4(PrimaryColor.r, PrimaryColor.g, PrimaryColor.b, PrimaryColor.a) });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new BeamEffectStyle { Width = authoring.Width, PrimaryColor = new float4(authoring.PrimaryColor.r, authoring.PrimaryColor.g, authoring.PrimaryColor.b, authoring.PrimaryColor.a) });
         }
     }
 }

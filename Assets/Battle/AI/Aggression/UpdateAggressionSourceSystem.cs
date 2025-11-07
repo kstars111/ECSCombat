@@ -24,21 +24,19 @@ namespace Battle.AI
                 .WithBurst()
                 .ScheduleParallel();
 
-            var ltwData = GetComponentDataFromEntity<LocalToWorld>( isReadOnly:true );
             Entities
-                .WithReadOnly(ltwData)
                 .ForEach( ( Entity e , ref AggroLocation source , in GuardBehaviour guard , in Target target ) =>
                 {
                     if (target.Value == Entity.Null)
                         return;
 
-                    if (!ltwData.HasComponent(guard.Target))
+                    if (!SystemAPI.HasComponent<LocalToWorld>(guard.Target))
                     {
-                        source.Position = ltwData[e].Position;
+                        source.Position = SystemAPI.GetComponent<LocalToWorld>(e).Position;
                         return;
                     }
 
-                    source.Position = ltwData[guard.Target].Position;
+                    source.Position = SystemAPI.GetComponent<LocalToWorld>(guard.Target).Position;
                 } )
                 .WithBurst()
                 .ScheduleParallel();

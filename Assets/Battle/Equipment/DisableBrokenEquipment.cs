@@ -15,16 +15,10 @@ namespace Battle.Equipment
         ]
     public class DisableBrokenEquipment : SystemBase
     {
-        protected EarlyEquipmentBufferSystem EquipmentBuffer;
-
-        protected override void OnCreate()
-        {
-            EquipmentBuffer = World.GetOrCreateSystem<EarlyEquipmentBufferSystem>();
-        }
-
         protected override void OnUpdate()
         {
-            var buffer = EquipmentBuffer.CreateCommandBuffer().AsParallelWriter();
+            var equipmentBuffer = World.GetOrCreateSystemManaged<EarlyEquipmentBufferSystem>();
+            var buffer = equipmentBuffer.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .WithAll<Enabled>()
@@ -41,7 +35,7 @@ namespace Battle.Equipment
                 )
                 .ScheduleParallel();
 
-            EquipmentBuffer.AddJobHandleForProducer(Dependency);
+            equipmentBuffer.AddJobHandleForProducer(Dependency);
         }
     }
 }

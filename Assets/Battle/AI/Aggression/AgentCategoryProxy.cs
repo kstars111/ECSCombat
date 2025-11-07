@@ -4,16 +4,10 @@ using UnityEngine;
 
 namespace Battle.AI
 {
-    public class AgentCategoryProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class AgentCategoryProxy : MonoBehaviour
     {
         [Tooltip("Type of this entity.")]
         public AgentCategory.eType AgentType;
-
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
-        {
-            var category = new AgentCategory { Type = AgentType };
-            dstManager.AddComponentData(entity, category);
-        }
 
 #if UNITY_EDITOR
         void OnGUI()
@@ -21,5 +15,15 @@ namespace Battle.AI
             AgentType = (AgentCategory.eType)EditorGUILayout.EnumFlagsField("Type of this entity", AgentType);
         }
 #endif
+    }
+
+    public class AgentCategoryBaker : Baker<AgentCategoryProxy>
+    {
+        public override void Bake(AgentCategoryProxy authoring)
+        {
+            var entity = GetEntity(TransformUsageFlags.None);
+            var category = new AgentCategory { Type = authoring.AgentType };
+            AddComponent(entity, category);
+        }
     }
 }

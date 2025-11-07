@@ -13,26 +13,21 @@ namespace Battle.Combat
     {
         protected override void OnUpdate()
         {
-            var lastHitTimerData = GetComponentDataFromEntity<LastHitTimer>( isReadOnly:false );
-            var healthData = GetComponentDataFromEntity<Health>( isReadOnly:false );
-            var lastHitColorData = GetComponentDataFromEntity<LastHitColor>( isReadOnly:false );
-
             Entities
                 .ForEach( ( in Attack attack , in Target target , in Damage damage ) =>
                 {
                     if( attack.Result==Attack.eResult.Miss )
                         return;
 
-                    if( lastHitTimerData.HasComponent(target.Value) && damage.Value>0f )
-                        lastHitTimerData[target.Value] = new LastHitTimer{ Value = 0f };
-                    if( lastHitColorData.HasComponent(target.Value) && damage.Value>0f )
-                        lastHitColorData[target.Value] = new LastHitColor{ Value = new float4(1f,1f,1f,1f) };
+                    if( SystemAPI.HasComponent<LastHitTimer>(target.Value) && damage.Value>0f )
+                        SystemAPI.SetComponent(target.Value, new LastHitTimer{ Value = 0f });
+                    if( SystemAPI.HasComponent<LastHitColor>(target.Value) && damage.Value>0f )
+                        SystemAPI.SetComponent(target.Value, new LastHitColor{ Value = new float4(1f,1f,1f,1f) });
 
-                    if( healthData.HasComponent(target.Value) )
+                    if( SystemAPI.HasComponent<Health>(target.Value) )
                     {
-                        Health health = healthData[target.Value];
+                        ref var health = ref SystemAPI.GetComponentRW<Health>(target.Value).ValueRW;
                         health.Value -= damage.Value;
-                        healthData[target.Value] = health;
                     }
                 } )
                 .WithBurst()

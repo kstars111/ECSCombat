@@ -12,17 +12,10 @@ namespace Battle.AI
     [UpdateInGroup(typeof(AISystemGroup))]
     public class IdleToCombatSystem : SystemBase
     {
-
-        AIStateChangeBufferSystem _commandBufferSystem;
-
-        protected override void OnCreate()
-        {
-            _commandBufferSystem = World.GetOrCreateSystem<AIStateChangeBufferSystem>();
-        }
-
         protected override void OnUpdate ()
         {
-            var commands = _commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var commandBufferSystem = World.GetOrCreateSystemManaged<AIStateChangeBufferSystem>();
+            var commands = commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .WithAll<IdleBehaviour>()
@@ -38,7 +31,7 @@ namespace Battle.AI
                 .WithBurst()
                 .ScheduleParallel();
 
-            _commandBufferSystem.AddJobHandleForProducer( Dependency );
+            commandBufferSystem.AddJobHandleForProducer( Dependency );
         }
 
     }

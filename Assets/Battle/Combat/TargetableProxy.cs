@@ -3,11 +3,16 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class TargetableProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class TargetableProxy : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    }
+
+    public class TargetableBaker : Baker<TargetableProxy>
+    {
+        public override void Bake(TargetableProxy authoring)
         {
-            dstManager.AddComponentData(entity, new Targetable());
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Targetable());
         }
     }
 }

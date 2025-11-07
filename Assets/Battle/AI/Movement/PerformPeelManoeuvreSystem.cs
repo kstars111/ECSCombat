@@ -16,17 +16,10 @@ namespace Battle.AI
     {
         public const float ENGAGEMENT_RADIUS = 10f;
 
-        private AIStateChangeBufferSystem m_AIStateBuffer;
-
-        protected override void OnCreate()
-        {
-            m_AIStateBuffer = World.GetOrCreateSystem<AIStateChangeBufferSystem>();
-        }
-
         protected override void OnUpdate()
         {
-            var positions = GetComponentDataFromEntity<Translation>(true);
-            var buffer = m_AIStateBuffer.CreateCommandBuffer().AsParallelWriter();
+            var aiStateBuffer = World.GetOrCreateSystemManaged<AIStateChangeBufferSystem>();
+            var buffer = aiStateBuffer.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .WithAll<PeelManoeuvre>()
@@ -41,7 +34,7 @@ namespace Battle.AI
                 in MaxTurnSpeed maxTurnSpeed
                 ) =>
                 {
-                    if (target.Value == Entity.Null || !positions.HasComponent(target.Value))
+                    if (target.Value == Entity.Null || !SystemAPI.HasComponent<Translation>(target.Value))
                     {
                         buffer.RemoveComponent<PeelManoeuvre>(entityInQueryIndex, e);
                         buffer.AddComponent(entityInQueryIndex, e, new IdleBehaviour());
@@ -50,7 +43,7 @@ namespace Battle.AI
                     }
 
                     //Target position
-                    var targetPos = positions[target.Value];
+                    var targetPos = SystemAPI.GetComponent<Translation>(target.Value);
 
                     // Turn away from the enemy.
                     float angleDiff = MathUtil.GetAngleDifference(MathUtil.GetHeadingToPoint(targetPos.Value - pos.Value), heading.Value);
@@ -68,9 +61,8 @@ namespace Battle.AI
                     }
                 }
                 )
-                .WithReadOnly(positions)
                 .ScheduleParallel();
-            m_AIStateBuffer.AddJobHandleForProducer(Dependency);
+            aiStateBuffer.AddJobHandleForProducer(Dependency);
         }
     }
 }

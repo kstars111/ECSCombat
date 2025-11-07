@@ -6,34 +6,31 @@ using UnityEngine;
 namespace Battle.Spawner
 {
     [DisallowMultipleComponent]
-    public class SpawnWaveComponentAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+    public class SpawnWaveComponentAuthoring : MonoBehaviour
     {
         public List<GameObject> Templates;
         public List<float> Number;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class SpawnWaveComponentBaker : Baker<SpawnWaveComponentAuthoring>
+    {
+        public override void Bake(SpawnWaveComponentAuthoring authoring)
         {
-            dstManager.AddBuffer<SpawnWaveComponent>(entity);
+            var entity = GetEntity(TransformUsageFlags.None);
+            var buffer = AddBuffer<SpawnWaveComponent>(entity);
 
-            var buffer = dstManager.GetBuffer<SpawnWaveComponent>(entity);
-
-            if (Templates.Count != Number.Count)
+            if (authoring.Templates.Count != authoring.Number.Count)
                 throw new Exception("Template and Number lists must be of matching length.");
 
-            for (int i=0; i < Templates.Count; i++)
+            for (int i = 0; i < authoring.Templates.Count; i++)
             {
-                var toSpawn = conversionSystem.GetPrimaryEntity(Templates[i]);
+                var toSpawn = GetEntity(authoring.Templates[i], TransformUsageFlags.None);
                 buffer.Add(new SpawnWaveComponent
                 {
-                    Number = Number[i],
+                    Number = authoring.Number[i],
                     Template = toSpawn
                 });
             }
-        }
-
-        public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
-        {
-            referencedPrefabs.AddRange(Templates);
         }
     }
 }

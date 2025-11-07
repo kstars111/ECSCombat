@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.Combat.AttackSources
 {
-    public class AttackProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class AttackProxy : MonoBehaviour
     {
         public float Accuracy;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class AttackBaker : Baker<AttackProxy>
+    {
+        public override void Bake(AttackProxy authoring)
         {
-            dstManager.AddComponentData(entity, Attack.New(Accuracy));
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, Attack.New(authoring.Accuracy));
         }
     }
 }

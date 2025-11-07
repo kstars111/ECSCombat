@@ -12,21 +12,16 @@ namespace Battle.Equipment
     {
         protected override void OnUpdate ()
         {
-            var parentData = GetComponentDataFromEntity<Parent>( isReadOnly:true );
-            var massData = GetComponentDataFromEntity<Mass>( isReadOnly:false );
-
             Entities
                 .WithAll<Enabling>()
-                .WithReadOnly(parentData)
                 .ForEach( ( in EquipmentMass equipmentMass , in Parent parent ) =>
                 {
                     Parent ship = parent;
-                    while( parentData.HasComponent(ship.Value) )
-                        ship = parentData[ship.Value];
-                    
-                    Mass mass = massData[ship.Value];
+                    while( SystemAPI.HasComponent<Parent>(ship.Value) )
+                        ship = SystemAPI.GetComponent<Parent>(ship.Value);
+
+                    ref var mass = ref SystemAPI.GetComponentRW<Mass>(ship.Value).ValueRW;
                     mass.Value += equipmentMass.MassFractionalIncrease * mass.Base;
-                    massData[ship.Value] = mass;
                 } )
                 .WithBurst()
                 .ScheduleParallel();

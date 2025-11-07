@@ -12,12 +12,10 @@ namespace Battle.Combat
         ]
     public class DeleteEntitiesSystem : SystemBase
     {
-        private EndSimulationEntityCommandBufferSystem BufferSystem;
         private EntityQuery DeleteEntities;
 
         protected override void OnCreate()
         {
-            BufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
             DeleteEntities = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Delete>());
         }
 

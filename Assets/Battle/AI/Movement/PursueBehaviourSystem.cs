@@ -15,17 +15,10 @@ namespace Battle.AI
     {
         public const float PROXIMITY_RADIUS = 4f;
 
-        private AIStateChangeBufferSystem m_AIStateBuffer;
-
-        protected override void OnCreate()
-        {
-            m_AIStateBuffer = World.GetOrCreateSystem<AIStateChangeBufferSystem>();
-        }
-
         protected override void OnUpdate()
         {
-            var positions = GetComponentDataFromEntity<Translation>(true);
-            var buffer = m_AIStateBuffer.CreateCommandBuffer().AsParallelWriter();
+            var aiStateBuffer = World.GetOrCreateSystemManaged<AIStateChangeBufferSystem>();
+            var buffer = aiStateBuffer.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .ForEach(
@@ -38,7 +31,7 @@ namespace Battle.AI
                 in Translation pos
                 ) =>
                 {
-                    if (target.Value == Entity.Null || !positions.HasComponent(target.Value))
+                    if (target.Value == Entity.Null || !SystemAPI.HasComponent<Translation>(target.Value))
                     {
                         // Go to idle state
                         buffer.RemoveComponent<PursueBehaviour>(entityInQueryIndex, e);
@@ -47,7 +40,7 @@ namespace Battle.AI
                     }
 
                     // Set entity destination to target position
-                    destination.Destination = positions[target.Value].Value;
+                    destination.Destination = SystemAPI.GetComponent<Translation>(target.Value).Value;
 
                     // if too close to target, evasive manoeuvre
                     if (math.lengthsq(destination.Destination - pos.Value) < PROXIMITY_RADIUS * PROXIMITY_RADIUS)
@@ -58,10 +51,9 @@ namespace Battle.AI
                     }
                 }
                 )
-                .WithReadOnly(positions)
                 .ScheduleParallel();
 
-            m_AIStateBuffer.AddJobHandleForProducer(Dependency);
+            aiStateBuffer.AddJobHandleForProducer(Dependency);
         }
     }
 }

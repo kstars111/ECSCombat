@@ -1,18 +1,31 @@
 ﻿using Unity.Entities;
-using Unity.Rendering;
+using Unity.Entities.Graphics;
 using UnityEngine;
 
 namespace Battle.Effects
 {
-    public class LaserRendererProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class LaserRendererProxy : MonoBehaviour
     {
         public Material Material;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class LaserRendererBaker : Baker<LaserRendererProxy>
+    {
+        public override void Bake(LaserRendererProxy authoring)
         {
-            dstManager.AddComponentData(entity, new LaserRenderer());
-            dstManager.AddSharedComponentData(entity, new RenderMesh() {
-                mesh = new Mesh(), castShadows = UnityEngine.Rendering.ShadowCastingMode.Off, material = Material, receiveShadows = false, subMesh = 0 });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new LaserRenderer());
+
+            var renderMeshDescription = new RenderMeshDescription(
+                shadowCastingMode: UnityEngine.Rendering.ShadowCastingMode.Off,
+                receiveShadows: false);
+
+            RenderMeshUtility.AddComponents(
+                entity,
+                this,
+                renderMeshDescription,
+                new RenderMeshArray(new Material[] { authoring.Material }, new Mesh[] { new Mesh() }),
+                MaterialMeshInfo.FromRenderMeshArrayIndices(0, 0));
         }
     }
 

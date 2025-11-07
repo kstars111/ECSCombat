@@ -5,19 +5,23 @@ using UnityEngine;
 
 namespace Battle.AI
 {
-    public class AggroProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class AggroProxy : MonoBehaviour
     {
         public float Radius = 10f;
 
         [Tooltip("Time in seconds between retargetting. 0 to disable.")]
         public float RetargetTime = 0.0f;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class AggroBaker : Baker<AggroProxy>
+    {
+        public override void Bake(AggroProxy authoring)
         {
-            dstManager.AddComponentData(entity, new AggroRadius { Value = Radius });
-            dstManager.AddComponentData(entity, new AggroLocation());
-            if (RetargetTime > 0.0f)
-                dstManager.AddComponentData(entity, new RetargetBehaviour { Interval = RetargetTime, RemainingTime = RetargetTime });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new AggroRadius { Value = authoring.Radius });
+            AddComponent(entity, new AggroLocation());
+            if (authoring.RetargetTime > 0.0f)
+                AddComponent(entity, new RetargetBehaviour { Interval = authoring.RetargetTime, RemainingTime = authoring.RetargetTime });
         }
     }
 

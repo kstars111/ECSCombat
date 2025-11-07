@@ -14,15 +14,13 @@ namespace Battle.Equipment
     {
         protected override void OnUpdate ()
         {
-            var teamData = GetComponentDataFromEntity<Team>( isReadOnly:false );
-
             Entities
                 .WithAll<Team>()
                 .WithChangeFilter<Parent>()
                 .ForEach( ( Entity entity , in Parent parent ) =>
                 {
-                    if( teamData.HasComponent(parent.Value) )
-                        teamData[entity] = teamData[parent.Value];
+                    if( SystemAPI.HasComponent<Team>(parent.Value) )
+                        SystemAPI.SetComponent(entity, SystemAPI.GetComponent<Team>(parent.Value));
                 } )
                 .WithBurst()
                 .Schedule();

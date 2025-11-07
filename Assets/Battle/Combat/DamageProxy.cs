@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class DamageProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class DamageProxy : MonoBehaviour
     {
         public float Damage;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class DamageBaker : Baker<DamageProxy>
+    {
+        public override void Bake(DamageProxy authoring)
         {
-            dstManager.AddComponentData(entity, new Damage { Value = Damage });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Damage { Value = authoring.Damage });
         }
     }
 }

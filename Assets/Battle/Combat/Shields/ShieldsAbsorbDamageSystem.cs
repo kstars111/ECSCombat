@@ -14,24 +14,15 @@ namespace Battle.Combat
         ]
     public class ShieldsAbsorbDamageSystem : SystemBase
     {
-        PostAttackEntityBuffer _commandBufferSystem;
-
-        protected override void OnCreate()
-        {
-            _commandBufferSystem = World.GetOrCreateSystem<PostAttackEntityBuffer>();
-        }
-
         protected override void OnUpdate()
         {
-            var commands = _commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
-            var shieldData = GetComponentDataFromEntity<Shield>( isReadOnly:false );
-            var ltwData = GetComponentDataFromEntity<LocalToWorld>( isReadOnly:true );
-            
+            var commandBufferSystem = World.GetOrCreateSystemManaged<PostAttackEntityBuffer>();
+            var commands = commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+
             Entities
                 .WithName("enumerate_over_all_attacks_job")
                 .WithNone<ShieldBypass>()
                 .WithAll<Instigator>()
-                .WithReadOnly(ltwData)
                 .ForEach(
                 (Entity entity,
                 int entityInQueryIndex,
@@ -41,16 +32,16 @@ namespace Battle.Combat
                 ref HitLocation hitLocation,
                 ref Target target) =>
             {
-                if( !shieldData.HasComponent(target.Value) || !ltwData.HasComponent(target.Value) )
+                if( !SystemAPI.HasComponent<Shield>(target.Value) || !SystemAPI.HasComponent<LocalToWorld>(target.Value) )
                     return;
-                var shield = shieldData[target.Value];
+                ref var shield = ref SystemAPI.GetComponentRW<Shield>(target.Value).ValueRW;
 
                 // depleted shields do not block attacks.
                 if( shield.Health<=0f )
                     return;
 
                 // if attack comes from within shield there is no shield protection.
-                var targetPosition = ltwData[target.Value];
+                var targetPosition = SystemAPI.GetComponent<LocalToWorld>(target.Value);
                 float3 delta = targetPosition.Position - sourceLocation.Position;
                 if( math.lengthsq(delta)<math.pow(shield.Radius,2f) )
                     return;
@@ -60,7 +51,6 @@ namespace Battle.Combat
                 shield.Health = shield.Health - absorbed;
                 damage.Value = damage.Value - absorbed;
                 hitLocation.Position = targetPosition.Position + shield.Radius * -math.normalize(delta);
-                shieldData[target.Value] = shield;
 
                 // generate aesthetic effect.
                 bool blocked = absorbed > 0f;
@@ -76,7 +66,7 @@ namespace Battle.Combat
             .WithBurst()
             .Schedule();
 
-            _commandBufferSystem.AddJobHandleForProducer( Dependency );
+            commandBufferSystem.AddJobHandleForProducer( Dependency );
         }
     }
 }

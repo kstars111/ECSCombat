@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class LifetimeProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class LifetimeProxy : MonoBehaviour
     {
         public float Lifetime;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class LifetimeBaker : Baker<LifetimeProxy>
+    {
+        public override void Bake(LifetimeProxy authoring)
         {
-            dstManager.AddComponentData(entity, new Lifetime { Value = Lifetime });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Lifetime { Value = authoring.Lifetime });
         }
     }
 }

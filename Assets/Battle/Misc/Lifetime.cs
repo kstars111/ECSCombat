@@ -1,6 +1,6 @@
 ﻿using System;
 using Unity.Entities;
-using Unity.Rendering;
+using Unity.Entities.Graphics;
 
 namespace Battle.Combat
 {

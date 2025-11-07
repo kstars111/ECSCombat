@@ -21,8 +21,6 @@ namespace Battle.Combat.AttackSources
     {
         protected override void OnUpdate()
         {
-            var worldTransforms = GetComponentDataFromEntity<LocalToWorld>(true);
-
             Entities
                 .ForEach((ref TargettedTool tool) => tool.Firing = false)
                 .ScheduleParallel();
@@ -30,7 +28,6 @@ namespace Battle.Combat.AttackSources
             Entities
                 .WithAll<Enabled>()
                 .WithStoreEntityQueryInField(ref m_query)
-                .WithReadOnly(worldTransforms)
                 .ForEach(
                     (Entity attacker,
                     int entityInQueryIndex,
@@ -48,7 +45,7 @@ namespace Battle.Combat.AttackSources
                     if (!cooldown.IsReady())
                         return;
 
-                    var delta = worldTransforms[target.Value].Position - worldTransform.Position;
+                    var delta = SystemAPI.GetComponent<LocalToWorld>(target.Value).Position - worldTransform.Position;
 
                     // Cannot fire if out of weapon range
                     if (math.lengthsq(delta) > tool.Range * tool.Range)

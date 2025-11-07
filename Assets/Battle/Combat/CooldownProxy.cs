@@ -3,13 +3,17 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class CooldownProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class CooldownProxy : MonoBehaviour
     {
         public float Duration = 1.0f;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class CooldownBaker : Baker<CooldownProxy>
+    {
+        public override void Bake(CooldownProxy authoring)
         {
-            dstManager.AddComponentData(entity, new Cooldown { Duration = Duration, Timer = 0.0f });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Cooldown { Duration = authoring.Duration, Timer = 0.0f });
         }
     }
 }

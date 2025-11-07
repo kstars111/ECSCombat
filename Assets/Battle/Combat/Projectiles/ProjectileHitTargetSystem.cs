@@ -13,23 +13,13 @@ namespace Battle.Combat
     [UpdateInGroup(typeof(WeaponSystemsGroup))]
     public class ProjectileHitTargetSystem : SystemBase
     {
-        WeaponEntityBufferSystem CommandBufferSystem;
-
-        protected override void OnCreate()
-        {
-            CommandBufferSystem = World.GetOrCreateSystem<WeaponEntityBufferSystem>();
-        }
-
         protected override void OnUpdate()
         {
-            var ltwData = GetComponentDataFromEntity<LocalToWorld>(true);
-            var sizeRadiusData = GetComponentDataFromEntity<SizeRadius>(true);
             float dT = UnityEngine.Time.fixedDeltaTime;
-            var commands = CommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var commandBufferSystem = World.GetOrCreateSystemManaged<WeaponEntityBufferSystem>();
+            var commands = commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities
-                .WithReadOnly(sizeRadiusData)
-                .WithReadOnly(ltwData)
                 .ForEach( (
                     Entity e, int entityInQueryIndex,
                     ref Projectile projectile,
@@ -39,15 +29,15 @@ namespace Battle.Combat
                     in TurnSpeed turnSpeed
                 ) =>
                 {
-                    if (!ltwData.HasComponent(target.Value))
+                    if (!SystemAPI.HasComponent<LocalToWorld>(target.Value))
                         return; // Target does not exist?
 
-                    var tPos = ltwData[target.Value].Position;
+                    var tPos = SystemAPI.GetComponent<LocalToWorld>(target.Value).Position;
                     var delta = (tPos - transform.Position);
 
                     var projectileDistance = speed.Value * dT;
 
-                    float radius = (sizeRadiusData.HasComponent(target.Value)) ? sizeRadiusData[target.Value].Value : 0f;
+                    float radius = (SystemAPI.HasComponent<SizeRadius>(target.Value)) ? SystemAPI.GetComponent<SizeRadius>(target.Value).Value : 0f;
 
                     // If target out of range, return
                     if (math.length(delta) - radius > projectileDistance)
@@ -64,7 +54,7 @@ namespace Battle.Combat
                 .WithBurst()
                 .ScheduleParallel();
 
-            CommandBufferSystem.AddJobHandleForProducer(Dependency);
+            commandBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

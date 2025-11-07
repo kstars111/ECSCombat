@@ -18,15 +18,12 @@ namespace Battle.AI
     {
         protected override void OnUpdate()
         {
-            var ltwData = GetComponentDataFromEntity<LocalToWorld>( isReadOnly:true );
-
             Entities
                 .ForEach( ( ref TurretBehaviour behaviour, ref TargettedTool tool ) => behaviour.Range = tool.Range )
                 .WithBurst()
                 .ScheduleParallel();
 
             Entities
-                .WithReadOnly(ltwData)
                 .ForEach( (
                     Entity entity ,
                     int entityInQueryIndex ,
@@ -38,13 +35,13 @@ namespace Battle.AI
                 {
                     if( target.Value==Entity.Null )
                         return;
-                    if( !ltwData.HasComponent(target.Value) )
+                    if( !SystemAPI.HasComponent<LocalToWorld>(target.Value) )
                     {
                         target.Value = Entity.Null;
                         return;
                     }
 
-                    var targetPos = ltwData[target.Value].Position;
+                    var targetPos = SystemAPI.GetComponent<LocalToWorld>(target.Value).Position;
 
                     // Disengage if target is outside range.
                     if (math.lengthsq(targetPos - localToWorld.Position) > behaviour.Range * behaviour.Range)

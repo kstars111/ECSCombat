@@ -4,18 +4,22 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class ShieldProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class ShieldProxy : MonoBehaviour
     {
         [Tooltip("Hit points of this shield.")]
         public float Capacity;
 
         [Tooltip("Radius of the shield.")]
         public float Radius;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class ShieldBaker : Baker<ShieldProxy>
+    {
+        public override void Bake(ShieldProxy authoring)
         {
-            dstManager.AddComponentData(entity, new Shield { Health = Capacity, Radius = Radius });
-            dstManager.AddComponentData(entity, new MaxShield { Value = Capacity });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Shield { Health = authoring.Capacity, Radius = authoring.Radius });
+            AddComponent(entity, new MaxShield { Value = authoring.Capacity });
         }
     }
 }

@@ -15,16 +15,10 @@ namespace Battle.Combat.AttackSources
         ]
     public class ProjectileSpawnSystem : SystemBase
     {
-        protected WeaponEntityBufferSystem m_entityBufferSystem;
-
-        protected override void OnCreate()
-        {
-            m_entityBufferSystem = World.GetOrCreateSystem<WeaponEntityBufferSystem>();
-        }
-
         protected override void OnUpdate()
         {
-            var buffer = m_entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var entityBufferSystem = World.GetOrCreateSystemManaged<WeaponEntityBufferSystem>();
+            var buffer = entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .ForEach((
@@ -49,7 +43,7 @@ namespace Battle.Combat.AttackSources
                     buffer.AddComponent(entityInQueryIndex, projectile, team);
                 })
                 .ScheduleParallel();
-            m_entityBufferSystem.AddJobHandleForProducer(Dependency);
+            entityBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

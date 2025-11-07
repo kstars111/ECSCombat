@@ -2,7 +2,7 @@
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Jobs;
-using Unity.Rendering;
+using Unity.Entities.Graphics;
 
 using Battle.Combat;
 
@@ -15,18 +15,11 @@ namespace Battle.Effects
     [UpdateAfter(typeof(ShieldsAbsorbDamageSystem))]
     public class BeamEffectSystem : SystemBase
     {
-
-        PostAttackEntityBuffer _commandBufferSystem;
-
-        protected override void OnCreate ()
-        {
-            _commandBufferSystem = World.GetOrCreateSystem<PostAttackEntityBuffer>();
-        }
-
         protected override void OnUpdate ()
         {
             uint seed = (uint)UnityEngine.Random.Range(1,100000);
-            var commands = _commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var commandBufferSystem = World.GetOrCreateSystemManaged<PostAttackEntityBuffer>();
+            var commands = commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities
                 .WithName("CreateBeamEffects")
@@ -65,15 +58,13 @@ namespace Battle.Effects
                 .ScheduleParallel();
 
             // Update existing beam effects, eg to follow target or despawn.
-            var ltwData = GetComponentDataFromEntity<LocalToWorld>( isReadOnly:true );
             float deltaTime = GetSingleton<GameTimeDelta>().dT;
             Entities
                 .WithName("update_beam_effects_job")
-                .WithReadOnly(ltwData)
                 .ForEach( ( Entity e , int entityInQueryIndex , ref BeamEffect beamEffect , in Instigator attacker ) =>
                 {
-                    if (ltwData.HasComponent(attacker.Value))
-                        beamEffect.start = ltwData[attacker.Value].Position;
+                    if (SystemAPI.HasComponent<LocalToWorld>(attacker.Value))
+                        beamEffect.start = SystemAPI.GetComponent<LocalToWorld>(attacker.Value).Position;
 
                     beamEffect.lifetime -= deltaTime;
                     if (beamEffect.lifetime < 0f)
@@ -82,7 +73,7 @@ namespace Battle.Effects
                 .WithBurst()
                 .ScheduleParallel();
 
-            _commandBufferSystem.AddJobHandleForProducer(Dependency);
+            commandBufferSystem.AddJobHandleForProducer(Dependency);
         }
 
     }

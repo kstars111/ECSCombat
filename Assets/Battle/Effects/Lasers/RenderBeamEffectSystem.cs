@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 using Battle.Combat;
-using Unity.Rendering;
+using Unity.Entities.Graphics;
 
 namespace Battle.Effects
 {

@@ -11,7 +11,6 @@ namespace Battle.Combat
     {
         protected override void OnUpdate()
         {
-            var translations = GetComponentDataFromEntity<Translation>(true);
             Entities
                 .WithAll<Homing, Projectile>()
                 .ForEach(
@@ -22,12 +21,11 @@ namespace Battle.Combat
                     in Target target
                     ) =>
                 {
-                    if (target.Value == Entity.Null || !translations.HasComponent(target.Value))
+                    if (target.Value == Entity.Null || !SystemAPI.HasComponent<Translation>(target.Value))
                         return;
 
-                    destination.Destination = translations[target.Value].Value;
+                    destination.Destination = SystemAPI.GetComponent<Translation>(target.Value).Value;
                 })
-                .WithReadOnly(translations)
                 .ScheduleParallel();
         }
     }

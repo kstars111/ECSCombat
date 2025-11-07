@@ -11,16 +11,10 @@ namespace Battle.Combat
     [UpdateInGroup(typeof(AttackResultSystemsGroup)), UpdateAfter(typeof(DealAttackDamageSystem))]
     public class DestroyMortalEntitiesWithNoHealthSystem : SystemBase
     {
-        private PostAttackEntityBuffer m_entityBufferSystem;
-
-        protected override void OnCreate()
-        {
-            m_entityBufferSystem = World.GetOrCreateSystem<PostAttackEntityBuffer>();
-        }
-
         protected override void OnUpdate()
         {
-            var buffer = m_entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var entityBufferSystem = World.GetOrCreateSystemManaged<PostAttackEntityBuffer>();
+            var buffer = entityBufferSystem.CreateCommandBuffer().AsParallelWriter();
             Entities
                 .WithAll<Mortal>()
                 .ForEach(
@@ -35,7 +29,7 @@ namespace Battle.Combat
                 }
                 )
                 .ScheduleParallel();
-            m_entityBufferSystem.AddJobHandleForProducer(Dependency);
+            entityBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

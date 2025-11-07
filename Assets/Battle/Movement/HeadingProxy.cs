@@ -3,12 +3,16 @@ using UnityEngine;
 
 namespace Battle.Movement
 {
-    public class HeadingProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class HeadingProxy : MonoBehaviour
     {
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    }
+
+    public class HeadingBaker : Baker<HeadingProxy>
+    {
+        public override void Bake(HeadingProxy authoring)
         {
-            var data = new Heading { Value = 0.0f };
-            dstManager.AddComponentData(entity, data);
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Heading { Value = 0.0f });
         }
     }
 }

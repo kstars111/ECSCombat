@@ -3,14 +3,18 @@ using UnityEngine;
 
 namespace Battle.Combat
 {
-    public class CombatSizeProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class CombatSizeProxy : MonoBehaviour
     {
         [Tooltip("Characteristic length of the entity for purposes of hit chance in combat.")]
         public float Value = 0f;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class CombatSizeBaker : Baker<CombatSizeProxy>
+    {
+        public override void Bake(CombatSizeProxy authoring)
         {
-            dstManager.AddComponentData(entity, new CombatSize { Value = Value });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new CombatSize { Value = authoring.Value });
         }
     }
 }

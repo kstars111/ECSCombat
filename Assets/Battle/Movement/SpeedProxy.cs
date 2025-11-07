@@ -3,14 +3,18 @@ using UnityEngine;
 
 namespace Battle.Movement
 {
-    public class SpeedProxy : MonoBehaviour, IConvertGameObjectToEntity
+    public class SpeedProxy : MonoBehaviour
     {
         public float MaxSpeed = 1.0f;
+    }
 
-        public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class SpeedBaker : Baker<SpeedProxy>
+    {
+        public override void Bake(SpeedProxy authoring)
         {
-            dstManager.AddComponentData(entity, new Speed { Value = MaxSpeed });
-            dstManager.AddComponentData(entity, new MaxSpeed { Value = MaxSpeed });
+            var entity = GetEntity(TransformUsageFlags.None);
+            AddComponent(entity, new Speed { Value = authoring.MaxSpeed });
+            AddComponent(entity, new MaxSpeed { Value = authoring.MaxSpeed });
         }
     }
 }
